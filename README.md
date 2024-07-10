@@ -1,6 +1,6 @@
-# Tartarus: Node ID Generator for Avalanche Blockchain Network
+# Tartarus: Node ID Generator for Avalanche Nodes
 
-Tartarus is a Node ID generator for the Avalanche Blockchain Network. It generates node IDs with customizable prefixes and suffixes, and saves the generated nodes to a CSV file, a JSON file, or a directory that's compatible with the AvalancheGo Node.
+Tartarus is a NodeID generator for the Avalanche Nodes. It generates node IDs with customizable prefixes and suffixes, and saves the generated nodes to a CSV file, a JSON file, or a directory that's compatible with the AvalancheGo Node.
 
 ## Usage
 
