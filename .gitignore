@@ -1,1 +1,4 @@
-tartarus.db
+*.csv
+*.json
+staking
+tartarus
