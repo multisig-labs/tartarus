@@ -1,6 +1,7 @@
 package node
 
 import (
+	"encoding/hex"
 	"os"
 	"path/filepath"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/google/uuid"
 
 	db "github.com/multisig-labs/tartarus/database"
-	"github.com/multisig-labs/tartarus/utils"
 )
 
 func generateRandomTempFileNames() (string, string, error) {
@@ -82,18 +82,18 @@ func Generate() (db.Node, error) {
 
 	// get the nodeID bytes for the signature
 	nodeIDStr := nodeID.String()
-	nodeIDBytes := []byte(nodeIDStr)
 
 	// sign the nodeID
-	signature := bls.SignProofOfPossession(blsSecret, nodeIDBytes)
 	blsPublic := bls.PublicFromSecretKey(blsSecret)
 	blsPublicBytes := bls.PublicKeyToCompressedBytes(blsPublic)
 	blsPrivateBytes := bls.SecretKeyToBytes(blsSecret)
+
+	signature := bls.SignProofOfPossession(blsSecret, blsPublicBytes)
 	sigBytes := bls.SignatureToBytes(signature)
-	// we want to hex encode the bytes for the bls public and private key, as well as the signature
-	blsPublicHex := utils.BytesToHexPrefixed(blsPublicBytes)
-	blsPrivateHex := utils.BytesToHexPrefixed(blsPrivateBytes)
-	sigHex := utils.BytesToHexPrefixed(sigBytes)
+
+	blsPublicHex := hex.EncodeToString(blsPublicBytes)
+	blsPrivateHex := hex.EncodeToString(blsPrivateBytes)
+	sigHex := hex.EncodeToString(sigBytes)
 
 	certString := string(certBytes)
 	keyString := string(keyBytes)
