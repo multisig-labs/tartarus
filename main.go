@@ -16,12 +16,13 @@ import (
 
 func main() {
 	var args struct {
-		Count         int    `cli:"-n, --count, number of nodes to generate" default:"1"`
-		Prefix        string `cli:"-p, --prefix, prefix for the node ID" default:""`
-		Suffix        string `cli:"-s, --suffix, suffix for the node ID" default:""`
-		CaseSensitive bool   `cli:"-c, --case-sensitive, case sensitive node ID" default:"false"`
-		Output        string `cli:"-o, --output, output file for the nodes" default:"nodes.csv"`
-		Verbose       bool   `cli:"-v, --verbose, verbose output" default:"false"`
+		Count          int    `cli:"-n, --count, number of nodes to generate" default:"1"`
+		Prefix         string `cli:"-p, --prefix, prefix for the node ID" default:""`
+		Suffix         string `cli:"-s, --suffix, suffix for the node ID" default:""`
+		CaseSensitive  bool   `cli:"-c, --case-sensitive, case sensitive node ID" default:"false"`
+		Output         string `cli:"-o, --output, output file for the nodes" default:"nodes.csv"`
+		Verbose        bool   `cli:"-v, --verbose, verbose output" default:"false"`
+		ActiveProvider string `cli:"-a, --active-provider, active provider for the node" default:""`
 	}
 
 	mcli.Parse(&args)
@@ -53,6 +54,9 @@ func main() {
 			}
 
 			if strings.HasPrefix(nodeID, args.Prefix) && strings.HasSuffix(nodeID, args.Suffix) {
+				if args.ActiveProvider != "" {
+					n.ActiveProvider = args.ActiveProvider
+				}
 				nodes = append(nodes, n)
 				found = true
 				if attemptCounter > 0 {
