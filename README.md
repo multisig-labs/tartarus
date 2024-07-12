@@ -2,6 +2,24 @@
 
 Tartarus is a NodeID generator for the Avalanche Nodes. It generates node IDs with customizable prefixes and suffixes, and saves the generated nodes to a CSV file, a JSON file, or a directory that's compatible with the AvalancheGo Node.
 
+## Pros
+- Easy to use!
+- Customizable prefixes and suffixes!
+- Make one or a million nodes with a single command!
+- Output as CSV, JSON, or an AvalancheGo-compatible directory!
+
+## Cons
+- Not multi-threaded, so it can be slow for large numbers of nodes.
+- No regex support for prefixes and suffixes.
+- Requires a C compiler to build.
+
+## Building 
+Make sure you have a C Compiler installed on your system, as the AvalancheGo code used by Tartarus requires it. Then, build the executable using the following command:
+
+```sh
+go build -o tartarus main.go
+```
+
 ## Usage
 
 To use Tartarus, simply run the executable with the desired flags. For example:
@@ -19,10 +37,3 @@ This will generate 10 node IDs with the prefix "myprefix" and suffix "mysuffix",
 * `-c, --case-sensitive`: Whether to make the node IDs case-sensitive. Defaults to false.
 * `-o, --output`: The output file for the generated nodes. Defaults to "nodes.csv".
 * `-v, --verbose`: Whether to print verbose output. Defaults to false.
-
-## Building 
-Make sure you have a C Compiler installed on your system, as the AvalancheGo code used by Tartarus requires it. Then, build the executable using the following command:
-
-```sh
-go build -o tartarus main.go
-```
