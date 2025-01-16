@@ -7,12 +7,49 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/jxskiss/mcli"
 	"github.com/multisig-labs/tartarus/models"
 	"github.com/multisig-labs/tartarus/node"
 )
+
+// Worker function to generate nodes
+func generateNode(prefix, suffix string, caseSensitive bool, activeProvider string, resultChan chan models.Node, done chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	
+	for {
+		select {
+		case <-done:
+			return
+		default:
+			n, err := node.Generate()
+			if err != nil {
+				continue
+			}
+
+			nodeID := strings.Replace(n.NodeID, "NodeID-", "", -1)
+			if !caseSensitive {
+				nodeID = strings.ToLower(nodeID)
+			}
+
+			if strings.HasPrefix(nodeID, prefix) && strings.HasSuffix(nodeID, suffix) {
+				if activeProvider != "" {
+					n.ActiveProvider = activeProvider
+				}
+				select {
+				case resultChan <- n:
+					return
+				case <-done:
+					return
+				}
+			}
+		}
+	}
+}
 
 func main() {
 	var args struct {
@@ -23,6 +60,7 @@ func main() {
 		Output         string `cli:"-o, --output, output file for the nodes" default:"nodes.csv"`
 		Verbose        bool   `cli:"-v, --verbose, verbose output" default:"false"`
 		ActiveProvider string `cli:"-a, --active-provider, active provider for the node" default:""`
+		Threads        int    `cli:"-t, --threads, number of concurrent threads" default:"-1"`
 	}
 
 	mcli.Parse(&args)
@@ -37,39 +75,45 @@ func main() {
 	}
 
 	nodes := []models.Node{}
+	numWorkers := runtime.NumCPU() // Default to number of CPUs
+	if args.Threads > 0 {
+		numWorkers = args.Threads
+	}
+
+	if args.Verbose {
+		fmt.Printf("Using %d worker threads\n", numWorkers)
+	}
+
+	resultChan := make(chan models.Node)
+	progressTicker := time.NewTicker(1 * time.Second)
+	defer progressTicker.Stop()
 
 	for i := 0; i < args.Count; i++ {
+		var wg sync.WaitGroup
+		done := make(chan struct{})
 		found := false
-		attemptCounter := 0
+
+		// Start workers
+		for w := 0; w < numWorkers; w++ {
+			wg.Add(1)
+			go generateNode(args.Prefix, args.Suffix, args.CaseSensitive, args.ActiveProvider, resultChan, done, &wg)
+		}
+
+		// Wait for result or print progress
 		for !found {
-			n, err := node.Generate()
-			if err != nil {
-				panic(err)
-			}
-
-			nodeID := strings.Replace(n.NodeID, "NodeID-", "", -1)
-
-			if !args.CaseSensitive {
-				nodeID = strings.ToLower(nodeID)
-			}
-
-			if strings.HasPrefix(nodeID, args.Prefix) && strings.HasSuffix(nodeID, args.Suffix) {
-				if args.ActiveProvider != "" {
-					n.ActiveProvider = args.ActiveProvider
-				}
-				nodes = append(nodes, n)
+			select {
+			case n := <-resultChan:
 				found = true
-				if attemptCounter > 0 {
-					fmt.Println()
-				}
-				fmt.Println("Generated node:", n.NodeID)
-			}
-			attemptCounter += 1
-			if attemptCounter > 1000 {
+				nodes = append(nodes, n)
+				fmt.Println("\nGenerated node:", n.NodeID)
+				close(done) // Signal all workers to stop
+			case <-progressTicker.C:
 				fmt.Print(".")
-				attemptCounter = 0
 			}
 		}
+
+		// Wait for all workers to finish
+		wg.Wait()
 	}
 
 	if strings.HasSuffix(args.Output, ".csv") {
