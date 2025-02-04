@@ -61,12 +61,13 @@ fi
 SIGNUP_ENDPOINT="${SUPABASE_URL}/auth/v1/signup"
 
 # Create JSON payload
-read -r -d '' PAYLOAD <<EOF
+PAYLOAD=$(cat <<EOF
 {
     "email": "$USER_EMAIL",
     "password": "$PASSWORD1"
 }
 EOF
+)
 
 # Make the POST request to sign up the user
 response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$SIGNUP_ENDPOINT" \

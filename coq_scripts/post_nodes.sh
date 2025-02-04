@@ -10,29 +10,38 @@
 # =====================================================
 
 # -----------------------------
+# Define Default Parameters
+# -----------------------------
+DATA_FILE=""
+CHAIN_ID="43114"  # default chain_id
+
+# -----------------------------
 # Function: Display Usage
 # -----------------------------
 usage() {
-    echo "Usage: $0 -d /path/to/data.json"
+    echo "Usage: $0 -d /path/to/data.json [-C chain_id]"
     echo
     echo "Options:"
     echo "  -d, --data      Path to the JSON file containing data to send to the Edge Function. (Required)"
+    echo "  -C, --chain-id  Chain id to append as query parameter (default: 43114)"
     echo "  -h, --help      Display this help message."
     echo
     echo "Example:"
-    echo "  $0 -d ~/projects/nodes_data.json"
+    echo "  $0 -d ~/projects/nodes_data.json -C 43114"
     exit 1
 }
 
 # -----------------------------
 # Parse Command-Line Arguments
 # -----------------------------
-DATA_FILE=""
-
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -d|--data)
             DATA_FILE="$2"
+            shift 2
+            ;;
+        -C|--chain-id)
+            CHAIN_ID="$2"
             shift 2
             ;;
         -h|--help)
@@ -67,7 +76,8 @@ fi
 SUPABASE_URL="https://glahotetihpffpvaxvul.supabase.co"
 # anon key, this is fine to distribute
 SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYWhvdGV0aWhwZmZwdmF4dnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU5NjQzODEsImV4cCI6MjAyMTU0MDM4MX0.jFNd-pmq4U57vL8bYi3WCjuzzIWfq_Q3lyIIH4XGpRg"
-EDGE_FUNCTION_URL="$SUPABASE_URL/functions/v1/add_node_keys"
+# Append the chain_id as a query parameter to the EDGE_FUNCTION_URL.
+EDGE_FUNCTION_URL="$SUPABASE_URL/functions/v1/add_node_keys?chain_id=$CHAIN_ID"
 
 # -----------------------------
 # Obtain Email and Password Securely
@@ -158,6 +168,6 @@ EDGE_RESPONSE=$(curl -s -X POST "$EDGE_FUNCTION_URL" \
 echo "Response:"
 echo "$EDGE_RESPONSE"
 
-RESPONSE_FILE="$HOME/post_nodes_response.json"
+RESPONSE_FILE="post_nodes_response.json"
 echo "$EDGE_RESPONSE" > "$RESPONSE_FILE"
 echo "Response saved to $RESPONSE_FILE"
