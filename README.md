@@ -47,10 +47,12 @@ go build -o tartarus main.go
 To use Tartarus, simply run the executable with the desired flags. For example:
 
 ```sh
-./tartarus -n 10 -p myprefix -s mysuffix -o output.csv
+./tartarus -n 10 -p abc -o output.csv
 ```
 
-This will generate 10 node IDs with the prefix "myprefix" and suffix "mysuffix", and save them to a CSV file called "output.csv".
+This will generate 10 node IDs with the prefix "abc" and save them to a CSV file called "output.csv".
+
+NOTE: THIS WILL TAKE A LONG TIME if you choose long prefixes!
 
 ## Flags
 
