@@ -142,7 +142,11 @@ fi
 
 echo "Transforming data..."
 
-TRANSFORMED_DATA=$(jq '{nodes: [.nodes[] | {node_id, bls_public_key: .bls_public, bls_signature}]}' "$DATA_FILE")
+TRANSFORMED_DATA=$(jq '{nodes: [.nodes[] | {
+    node_id,
+    bls_public_key: (if .bls_public | test("^0x") then .bls_public else "0x"+.bls_public end),
+    bls_signature: (if .bls_signature | test("^0x") then .bls_signature else "0x"+.bls_signature end)
+}]}' "$DATA_FILE")
 
 # Optional: Validate the transformed data
 if ! echo "$TRANSFORMED_DATA" | jq empty 2>/dev/null; then
