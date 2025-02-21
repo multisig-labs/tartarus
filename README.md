@@ -26,7 +26,7 @@ Tartarus is a NodeID and BLS Key generator for the Avalanche Nodes. It generates
 Here's a oneline command to install Go 1.23 on Ubuntu:
 
 ```sh
-sudo rm -rf /usr/local/go && wget -qO- https://golang.org/dl/go1.23.2.linux-amd64.tar.gz | sudo tar -C /usr/local -xzf - && echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a $HOME/.bashrc && source $HOME/.bashrc && rm -f go1.22.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && wget -qO- https://golang.org/dl/go1.23.2.linux-amd64.tar.gz | sudo tar -C /usr/local -xzf - && echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a $HOME/.bashrc && source $HOME/.bashrc && rm -f go1.23.2.linux-amd64.tar.gz
 ```
 
 You'll also need a C compiler, you can install GCC with the following command:
