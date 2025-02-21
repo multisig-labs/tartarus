@@ -7,9 +7,10 @@ set -e
 #       Configuration
 # =============================
 SUPABASE_URL="https://glahotetihpffpvaxvul.supabase.co"
+# SUPABASE_URL="http://127.0.0.1:54321"
 # anon key, this is fine to distribute
 SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYWhvdGV0aWhwZmZwdmF4dnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU5NjQzODEsImV4cCI6MjAyMTU0MDM4MX0.jFNd-pmq4U57vL8bYi3WCjuzzIWfq_Q3lyIIH4XGpRg"
-
+# SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 # =============================
 #      Helper Functions
 # =============================

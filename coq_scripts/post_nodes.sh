@@ -74,8 +74,10 @@ fi
 
 
 SUPABASE_URL="https://glahotetihpffpvaxvul.supabase.co"
+# SUPABASE_URL="http://127.0.0.1:54321"
 # anon key, this is fine to distribute
 SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYWhvdGV0aWhwZmZwdmF4dnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU5NjQzODEsImV4cCI6MjAyMTU0MDM4MX0.jFNd-pmq4U57vL8bYi3WCjuzzIWfq_Q3lyIIH4XGpRg"
+# SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 # Append the chain_id as a query parameter to the EDGE_FUNCTION_URL.
 EDGE_FUNCTION_URL="$SUPABASE_URL/functions/v1/add_node_keys?chain_id=$CHAIN_ID"
 
@@ -137,41 +139,53 @@ else
 fi
 
 # -----------------------------
-# Transform Data for Edge Function Call
+# Transform and Batch Process Data
 # -----------------------------
 
 echo "Transforming data..."
 
-TRANSFORMED_DATA=$(jq '{nodes: [.nodes[] | {
+# Get all nodes first
+ALL_NODES=$(jq '{nodes: [.nodes[] | {
     node_id,
     bls_public_key: (if .bls_public | test("^0x") then .bls_public else "0x"+.bls_public end),
     bls_signature: (if .bls_signature | test("^0x") then .bls_signature else "0x"+.bls_signature end)
 }]}' "$DATA_FILE")
 
-# Optional: Validate the transformed data
-if ! echo "$TRANSFORMED_DATA" | jq empty 2>/dev/null; then
-    echo "Error: Transformed data is invalid JSON."
-    exit 1
-fi
+TOTAL_NODES=$(echo "$ALL_NODES" | jq '.nodes | length')
+BATCH_SIZE=25
+TOTAL_BATCHES=$(( (TOTAL_NODES + BATCH_SIZE - 1) / BATCH_SIZE ))
 
-# -----------------------------
-# Call the Edge Function
-# -----------------------------
+echo "Total nodes to process: $TOTAL_NODES"
+echo "Will process in batches of $BATCH_SIZE nodes"
+echo "Total number of batches: $TOTAL_BATCHES"
 
-echo "POSTing Nodes..."
+for ((i=0; i<TOTAL_NODES; i+=BATCH_SIZE)); do
+    BATCH_NUM=$(( (i / BATCH_SIZE) + 1 ))
+    echo "Processing batch $BATCH_NUM of $TOTAL_BATCHES..."
+    
+    # Extract current batch of nodes
+    BATCH_DATA=$(echo "$ALL_NODES" | jq "{nodes: .nodes[$i:$(($i+$BATCH_SIZE))]}")
 
-EDGE_RESPONSE=$(curl -s -X POST "$EDGE_FUNCTION_URL" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -d "$TRANSFORMED_DATA")
+    # Optional: Validate the batch data
+    if ! echo "$BATCH_DATA" | jq empty 2>/dev/null; then
+        echo "Error: Batch data is invalid JSON."
+        exit 1
+    fi
 
-# -----------------------------
-# Handle the Edge Function Response
-# -----------------------------
+    echo "POSTing batch of nodes..."
 
-echo "Response:"
-echo "$EDGE_RESPONSE"
+    EDGE_RESPONSE=$(curl -s -X POST "$EDGE_FUNCTION_URL" \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $ACCESS_TOKEN" \
+      -d "$BATCH_DATA")
 
-RESPONSE_FILE="post_nodes_response.json"
-echo "$EDGE_RESPONSE" > "$RESPONSE_FILE"
-echo "Response saved to $RESPONSE_FILE"
+    echo "Batch $BATCH_NUM response:"
+    echo "$EDGE_RESPONSE"
+
+    # Save each batch response
+    BATCH_RESPONSE_FILE="post_nodes_response_batch_${BATCH_NUM}.json"
+    echo "$EDGE_RESPONSE" > "$BATCH_RESPONSE_FILE"
+    echo "Batch $BATCH_NUM response saved to $BATCH_RESPONSE_FILE"
+done
+
+echo "All batches processed successfully!"
