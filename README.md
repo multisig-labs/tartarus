@@ -17,8 +17,7 @@ Tartarus is a NodeID and BLS Key generator for the Avalanche Nodes. It generates
 
 ## Pre-requisites
 
-- Go **1.23.2 only**.
-  - Has been known to break on versions **1.24 and above**.
+- Go 1.23+
 - A C compiler (GCC or Clang)
 
 ### Installing on Ubuntu
