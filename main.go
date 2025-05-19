@@ -252,6 +252,8 @@ type NodeTableInsertPayload struct {
 	BLSSignature       string `json:"bls_signature"`
 	HardwareProviderID int    `json:"hardware_provider_id"`
 	UserID             string `json:"user_id"`
+	HWStatus           string `json:"hw_status,omitempty"`
+	NodeState          string `json:"node_state,omitempty"`
 	L1ID               string `json:"l1_id,omitempty"` // Make L1ID omitempty as well if it can be truly optional
 	Network            string `json:"network"`
 	StakerCert         string `json:"staker_cert,omitempty"`     // Corresponds to models.Node.Cert
@@ -417,6 +419,8 @@ func uploadNodesToTable(args *UploadArgs, accessToken string, authUserID string)
 			BLSSignature:       blsSignature,
 			HardwareProviderID: args.HardwareProviderID,
 			UserID:             authUserID,
+			HWStatus:           "inactive",
+			NodeState:          "available",
 			L1ID:               args.L1ID,
 			Network:            args.Network,
 		}
