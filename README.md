@@ -1,6 +1,6 @@
 # Tartarus: Node ID Generator for Avalanche Nodes
 
-Tartarus is a NodeID and BLS Key generator for the Avalanche Nodes. It generates node IDs with customizable prefixes and suffixes, and saves the generated nodes to a CSV file, a JSON file, or a directory that's compatible with the AvalancheGo Node.
+Tartarus is a NodeID and BLS Key generator for Avalanche Nodes. It generates node IDs with customizable prefixes and suffixes, and saves the generated nodes to a CSV file, a JSON file, or a directory that's compatible with the AvalancheGo Node.
 
 ## Features
 
@@ -78,6 +78,7 @@ You can customize the output format and number of nodes:
 ```
 
 Available flags:
+
 - `-n, --count`: Number of nodes to generate (default: 1)
 - `-p, --prefix`: Prefix for node IDs
 - `-s, --suffix`: Suffix for node IDs
@@ -94,10 +95,12 @@ Once you have generated your node keys, you can upload them to the system:
 ```
 
 Required flags for upload:
+
 - `-d, --data-file`: Path to your JSON file containing node data
 - `--hp-id`: Your Hardware Provider ID (assigned by administrators)
 
 Optional flags:
+
 - `-e, --email`: Your email address (will prompt if not provided)
 - `--password`: Your password (will prompt securely if not provided)
 - `--network`: Network for the nodes (default: "fuji")
