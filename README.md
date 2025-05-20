@@ -86,6 +86,14 @@ Available flags:
 - `-o, --output`: Output file/directory (default: "nodes.csv")
 - `-v, --verbose`: Enable verbose output
 
+### Converting `nodes.json` to Staking Keys
+
+You can also generate staking keys (avalanchego format) from `nodes.json` with:
+
+```
+go run cmd/convert/main.go -i nodes.json -o staking-dir
+```
+
 ### Uploading Node Keys
 
 Once you have generated your node keys, you can upload them to the system:
