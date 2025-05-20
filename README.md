@@ -176,3 +176,19 @@ If you encounter any issues:
 4. Ensure you have the required permissions for the output directory
 
 For additional help, please contact the system administrators.
+
+## Examples
+
+### Generate 10 nodes with the prefix "ggp" and save as JSON
+
+```bash
+./tartarus -n 10 -p "ggp" -o nodes.json
+```
+
+### Upload CX Chain Nodes
+
+```bash
+./tartarus upload -d nodes.json --hp-id 1 --network mainnet -L "WChFQ1twkXBLxZGo4qojC9AgizFrRdMRnPCK9FZmisY7z6pUs" --email "test@test.com"
+```
+
+It with prompt you for your password. Replace the hardware provider ID with your own.

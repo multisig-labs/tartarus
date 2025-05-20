@@ -233,7 +233,7 @@ type UploadArgs struct {
 	SupabaseAnonKey    string `cli:"--supabase-anon-key, Supabase Anon Key" default:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHFyZXR4Z2NlaGhmYmRqd2N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk0MjQ0MzksImV4cCI6MjAzNTAwMDQzOX0.xIab8CXMlXf7SzsoW1DieuAkDI5GOIAwD9uA1z7Zz9k"`
 	HardwareProviderID int    `cli:"--hp-id, Hardware Provider ID (integer, required)"`
 	L1ID               string `cli:"-L, --l1-id, L1 ID for the node (optional, defaults to empty string)" default:""`
-	Network            string `cli:"--network, Network for the nodes (e.g., fuji, mainnet)" default:"fuji"`
+	Network            string `cli:"--network, Network for the nodes (e.g., fuji, mainnet)" default:"mainnet"`
 	IncludeSecrets     bool   `cli:"--include-secrets, Include staker cert, staker key, and BLS private key in the upload"`
 	BatchSize          int    `cli:"--batch-size, Number of nodes to upload in each batch" default:"25"`
 }
