@@ -90,8 +90,8 @@ Available flags:
 
 You can also generate staking keys (avalanchego format) from `nodes.json` with:
 
-```
-go run cmd/convert/main.go -i nodes.json -o staking-dir
+```sh
+./tartarus convert -i nodes.json -o staking-dir
 ```
 
 ### Uploading Node Keys
@@ -117,6 +117,20 @@ Optional flags:
 - `-L, --l1-id`: The L1 ID to associate with the uploaded nodes
 - `--supabase-url`: The base URL for the Supabase API
 - `--supabase-anon-key`: The public anonymous key for the Supabase project
+
+### Converting Node Keys
+
+You can convert a JSON file containing nodes into individual staking directories:
+
+```bash
+./tartarus convert -i nodes.json -o staking-dirs
+```
+
+Available flags for convert:
+
+- `-i, --input`: Input JSON file containing nodes (default: "nodes.json")
+- `-o, --output`: Output directory for staking files (default: "staking-dirs")
+- `-v, --verbose`: Enable verbose output
 
 ### Input Data File Format
 
@@ -192,3 +206,11 @@ For additional help, please contact the system administrators.
 ```
 
 It with prompt you for your password. Replace the hardware provider ID with your own.
+
+### Convert JSON to Staking Directories
+
+```bash
+./tartarus convert -i nodes.json -o my-staking-dirs -v
+```
+
+This will create individual directories for each node with the necessary staking files.

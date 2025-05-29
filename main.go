@@ -238,6 +238,15 @@ type UploadArgs struct {
 	BatchSize          int    `cli:"--batch-size, Number of nodes to upload in each batch" default:"25"`
 }
 
+// --- Convert Command Functionality ---
+
+// ConvertArgs defines the arguments for the 'convert' subcommand.
+type ConvertArgs struct {
+	Input   string `cli:"-i, --input, input JSON file containing nodes" default:"nodes.json"`
+	Output  string `cli:"-o, --output, output directory for staking files" default:"staking-dirs"`
+	Verbose bool   `cli:"-v, --verbose, verbose output" default:"false"`
+}
+
 const (
 	jwtCacheFile     = "ggp_api.json" // In current working directory
 	authEndpointPath = "/auth/v1/token?grant_type=password"
@@ -540,6 +549,78 @@ func runUploadCommand() {
 	fmt.Println("Upload process completed.")
 }
 
+// runConvertCommand is the handler for the "convert" subcommand.
+func runConvertCommand() {
+	var convertArgs ConvertArgs
+	_, parseErr := mcli.Parse(&convertArgs)
+	if parseErr != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing convert command arguments: %v\n", parseErr)
+		os.Exit(1)
+	}
+
+	// Read the JSON file
+	jsonFile, err := os.ReadFile(convertArgs.Input)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading input file: %v\n", err)
+		os.Exit(1)
+	}
+
+	var nodeMap struct {
+		Nodes []models.Node `json:"nodes"`
+	}
+
+	if err := json.Unmarshal(jsonFile, &nodeMap); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing JSON: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create the main output directory
+	if err := os.MkdirAll(convertArgs.Output, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating output directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Process each node
+	for _, node := range nodeMap.Nodes {
+		nodeDir := filepath.Join(convertArgs.Output, node.NodeID)
+		if convertArgs.Verbose {
+			fmt.Printf("Creating staking directory for node: %s\n", node.NodeID)
+		}
+
+		// Create directory for this node
+		if err := os.MkdirAll(nodeDir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating node directory: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Write staker.crt
+		if err := os.WriteFile(filepath.Join(nodeDir, "staker.crt"), []byte(node.Cert), 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing staker.crt: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Write staker.key
+		if err := os.WriteFile(filepath.Join(nodeDir, "staker.key"), []byte(node.Key), 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing staker.key: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Decode and write signer.key
+		blsPrivateBytes, err := hex.DecodeString(node.BLSPrivateKey)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error decoding BLS private key: %v\n", err)
+			os.Exit(1)
+		}
+
+		if err := os.WriteFile(filepath.Join(nodeDir, "signer.key"), blsPrivateBytes, 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing signer.key: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	fmt.Printf("Successfully created staking directories for %d nodes in: %s\n", len(nodeMap.Nodes), convertArgs.Output)
+}
+
 func main() {
 	// Define a variable to hold arguments for the generate command (root command)
 	var generateArgs GenerateArgs
@@ -552,6 +633,9 @@ func main() {
 
 	// Add the 'upload' subcommand
 	mcli.Add("upload", runUploadCommand, "Uploads node information using cached or prompted credentials.")
+
+	// Add the 'convert' subcommand
+	mcli.Add("convert", runConvertCommand, "Converts a JSON file of nodes into staking directories.")
 
 	// Run the CLI application
 	mcli.Run()
